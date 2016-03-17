@@ -23,6 +23,10 @@ class Base(Page):
     # Not logged in
     _browserid_login_locator = (By.ID, 'nav-login')
 
+    def __init__(self, base_url, selenium):
+        super(Base, self).__init__(base_url, selenium)
+        self.bidpom = BIDPOM(self.selenium)
+
     @property
     def page_title(self):
         WebDriverWait(self.selenium, self.timeout).until(lambda s: self.selenium.title)
@@ -49,12 +53,18 @@ class Base(Page):
     def click_browserid_login(self):
         self.selenium.find_element(*self._browserid_login_locator).click()
 
+    # def login(self, email, password):
+    #     self.click_browserid_login()
+    #     from browserid import BrowserID
+    #     pop_up = BrowserID(self.selenium, self.timeout)
+    #     pop_up.sign_in(email, password)
+    #     WebDriverWait(self.selenium, self.timeout).until(lambda s: self.is_user_loggedin)
+
     def login(self, email, password):
-        self.click_browserid_login()
-        from browserid import BrowserID
-        pop_up = BrowserID(self.selenium, self.timeout)
-        pop_up.sign_in(email, password)
-        WebDriverWait(self.selenium, self.timeout).until(lambda s: self.is_user_loggedin)
+        self.selenium.find_element_by_id('login').click()
+        from bidpom import BIDPOM
+        self.bidpom.sign_in(email,password)
+        assert self.selenium.find_element_by_id('logout').is_displayed()
 
     def create_new_user(self, email, password):
         self.click_browserid_login()
